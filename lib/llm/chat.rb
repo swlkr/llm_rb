@@ -42,7 +42,6 @@ module LLM
 
     def with_instructions(text)
       @instructions = text
-      # Remove existing system message and add new one
       @messages.reject! { |m| m.system? }
       @messages.unshift(Message.new(role: :system, content: text)) unless text.nil?
       self

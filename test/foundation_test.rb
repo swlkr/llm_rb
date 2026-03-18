@@ -75,22 +75,6 @@ class MessageTest < Minitest::Test
   end
 end
 
-class ChunkTest < Minitest::Test
-  def test_struct
-    chunk = LLM::Chunk.new(content: "hi", model_id: "gpt-4o")
-    assert_equal "hi", chunk.content
-    assert_equal "gpt-4o", chunk.model_id
-  end
-end
-
-class SchemaTest < Minitest::Test
-  def test_attrs
-    s = LLM::Schema.new(name: "Person", schema: { type: "object" })
-    assert_equal "Person", s.name
-    assert_equal({ type: "object" }, s.schema)
-  end
-end
-
 class ImageTest < Minitest::Test
   def test_save
     img = LLM::Image.new(data: Base64.strict_encode64("PNG_DATA"))

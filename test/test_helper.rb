@@ -6,7 +6,6 @@ require "minitest/autorun"
 require "webmock/minitest"
 require "json"
 
-# Disable all real network connections in tests
 WebMock.disable_net_connect!
 
 module TestHelpers

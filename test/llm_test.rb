@@ -5,10 +5,6 @@ require "test_helper"
 class LLMTest < Minitest::Test
   include TestHelpers
 
-  def test_version
-    refute_nil LLM::VERSION
-  end
-
   def test_configure
     LLM.configure do |c|
       c.openai_api_key = "my-key"

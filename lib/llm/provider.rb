@@ -90,7 +90,7 @@ module LLM
           end
         end
       end
-      # Process remaining buffer
+      # SSE events can split across chunks — flush anything left in the buffer
       unless buffer.strip.empty?
         buffer.each_line do |line|
           line.strip!
@@ -148,7 +148,7 @@ module LLM
 
       message = extract_error_message(body)
 
-      # Check for context length exceeded
+      # Context length errors arrive as 400s but need their own exception so callers can truncate and retry
       if status == 400 && message.to_s.match?(/context.length|token.limit|too.long|max.*token/i)
         raise ContextLengthExceededError.new(message, status: status, body: body)
       end

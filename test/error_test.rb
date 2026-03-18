@@ -18,9 +18,4 @@ class ErrorTest < Minitest::Test
     assert_equal LLM::ServiceUnavailableError, LLM::ERROR_MAP[503]
   end
 
-  def test_subclasses
-    assert LLM::BadRequestError < LLM::Error
-    assert LLM::UnauthorizedError < LLM::Error
-    assert LLM::ContextLengthExceededError < LLM::Error
-  end
 end

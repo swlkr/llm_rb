@@ -42,7 +42,7 @@ module LLM
           payload[:temperature] = temperature if temperature
           payload[:stream] = true if stream
 
-          # Handle schema via forced tool_use
+          # Anthropic lacks native structured output — fake it by forcing a tool_use call
           if schema
             schema_tool = {
               name: schema.name,
@@ -67,8 +67,7 @@ module LLM
             if msg.system?
               system_text = msg.content.to_s
             elsif msg.tool?
-              # Anthropic: tool results go as content blocks in a user message
-              # Group consecutive tool messages
+              # Anthropic requires tool results as content blocks inside a user message, not a separate role
               if api_messages.last && api_messages.last[:role] == "user" &&
                  api_messages.last[:content].is_a?(Array) &&
                  api_messages.last[:content].any? { |c| c[:type] == "tool_result" }
@@ -108,7 +107,7 @@ module LLM
           tool_calls = parse_tool_calls(content_blocks)
           usage = data["usage"] || {}
 
-          # If this was a schema extraction via tool_use, convert tool input to JSON text
+          # Schema responses come back as tool_use input — unwrap to plain JSON for the caller
           content_text = if tool_calls && !tool_calls.empty? && text_parts.empty?
                            JSON.generate(tool_calls.first.arguments)
                          else
