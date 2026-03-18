@@ -19,6 +19,7 @@ module LLM
           when "content_block_start"
             block = data["content_block"] || {}
             if block["type"] == "tool_use"
+              @current_tool_id = block["id"]
               {
                 tool_call_id: block["id"],
                 tool_call_name: block["name"]
