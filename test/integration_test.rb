@@ -77,6 +77,30 @@ class IntegrationTest < Minitest::Test
       puts "\n  Anthropic structured: #{parsed.inspect}"
     end
 
+    def test_anthropic_streaming_tools
+      chat = LLM.chat(model: "claude-sonnet-4-6")
+      chunks = []
+      response = chat.with_tools(Calculator).ask("What is 99 * 101? Use the calculator tool.") { |c|
+        chunks << c.content if c.content
+      }
+      assert_match(/9,?999/, response.content.to_s)
+      assert chunks.length > 0, "Expected streaming chunks"
+      puts "\n  Anthropic streaming tools: #{chunks.length} chunks, result: #{response.content.to_s.inspect}"
+    end
+
+    def test_anthropic_streaming_conversation
+      chat = LLM.chat(model: "claude-sonnet-4-6")
+      chunks1 = []
+      chat.ask("My favorite color is blue.") { |c| chunks1 << c.content if c.content }
+      assert chunks1.length > 0
+
+      chunks2 = []
+      response = chat.ask("What is my favorite color?") { |c| chunks2 << c.content if c.content }
+      assert chunks2.length > 0
+      assert_match(/blue/i, response.content.to_s)
+      puts "\n  Anthropic streaming conversation: #{chunks2.length} chunks, result: #{response.content.to_s.inspect}"
+    end
+
     def test_anthropic_instructions
       chat = LLM.chat(model: "claude-sonnet-4-6")
       response = chat.with_instructions("Always respond in ALL CAPS.").ask("Say hi")
@@ -112,6 +136,30 @@ class IntegrationTest < Minitest::Test
       assert chunks.length > 0, "Expected at least one chunk"
       assert response.content.to_s.length > 0
       puts "\n  Gemini streaming: #{chunks.length} chunks"
+    end
+
+    def test_gemini_streaming_tools
+      chat = LLM.chat(model: "gemini-3-flash-preview")
+      chunks = []
+      response = chat.with_tools(Calculator).ask("What is 99 * 101? Use the calculator tool.") { |c|
+        chunks << c.content if c.content
+      }
+      assert_match(/9,?999/, response.content.to_s)
+      assert chunks.length > 0, "Expected streaming chunks"
+      puts "\n  Gemini streaming tools: #{chunks.length} chunks, result: #{response.content.to_s.inspect}"
+    end
+
+    def test_gemini_streaming_conversation
+      chat = LLM.chat(model: "gemini-3-flash-preview")
+      chunks1 = []
+      chat.ask("My favorite color is blue.") { |c| chunks1 << c.content if c.content }
+      assert chunks1.length > 0
+
+      chunks2 = []
+      response = chat.ask("What is my favorite color?") { |c| chunks2 << c.content if c.content }
+      assert chunks2.length > 0
+      assert_match(/blue/i, response.content.to_s)
+      puts "\n  Gemini streaming conversation: #{chunks2.length} chunks, result: #{response.content.to_s.inspect}"
     end
 
     def test_gemini_tools
@@ -155,6 +203,19 @@ class IntegrationTest < Minitest::Test
       puts "\n  Local LM conversation: #{response.content.to_s.inspect}"
       # Local models may not always recall, so just check we got a response
       assert response.content.to_s.length > 0
+    end
+
+    def test_local_streaming_conversation
+      chat = LLM.chat(model: ENV["LM_MODEL"], provider: :openai)
+      chunks1 = []
+      chat.ask("My favorite color is blue.") { |c| chunks1 << c.content if c.content }
+      assert chunks1.length > 0
+
+      chunks2 = []
+      response = chat.ask("What is my favorite color?") { |c| chunks2 << c.content if c.content }
+      assert chunks2.length > 0
+      assert response.content.to_s.length > 0
+      puts "\n  Local LM streaming conversation: #{chunks2.length} chunks, result: #{response.content.to_s.inspect}"
     end
 
     def test_local_streaming

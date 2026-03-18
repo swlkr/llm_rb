@@ -21,6 +21,7 @@ module LLM
               chunk[:tool_call_id] = "call_#{SecureRandom.hex(12)}"
               chunk[:tool_call_name] = call["name"]
               chunk[:tool_call_arguments] = JSON.generate(call["args"] || {})
+              chunk[:tool_call_thought_signature] = part["thoughtSignature"] if part["thoughtSignature"]
             end
           end
 

@@ -17,9 +17,12 @@ module LLM
 
       if chunk_hash[:tool_call_id]
         id = chunk_hash[:tool_call_id]
-        @tool_calls_data[id] ||= { id: id, name: nil, arguments: +"" }
+        @tool_calls_data[id] ||= { id: id, name: nil, arguments: +"", metadata: {} }
         @tool_calls_data[id][:name] = chunk_hash[:tool_call_name] if chunk_hash[:tool_call_name]
         @tool_calls_data[id][:arguments] << chunk_hash[:tool_call_arguments].to_s if chunk_hash[:tool_call_arguments]
+        if chunk_hash[:tool_call_thought_signature]
+          @tool_calls_data[id][:metadata][:thought_signature] = chunk_hash[:tool_call_thought_signature]
+        end
       end
 
       if chunk_hash[:input_tokens]
@@ -36,7 +39,7 @@ module LLM
     def to_message
       tool_calls = @tool_calls_data.values.map do |tc|
         args = tc[:arguments].empty? ? {} : JSON.parse(tc[:arguments])
-        ToolCall.new(id: tc[:id], name: tc[:name], arguments: args)
+        ToolCall.new(id: tc[:id], name: tc[:name], arguments: args, metadata: tc[:metadata] || {})
       end
 
       Message.new(
